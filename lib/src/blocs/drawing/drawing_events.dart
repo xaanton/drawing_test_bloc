@@ -2,25 +2,28 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
+import 'redux_state_object.dart';
 
 abstract class DrawingEvent extends Equatable {
-  DrawingEvent([List props = const []]) : super(props);
+  final ReduxStateObject state;
+  DrawingEvent(this.state, [List props = const []]) : super(props);
 }
 
 class DrawingUpdatedEvent extends DrawingEvent {
 
   final List<Offset> cur;
-
-  //final Image image;
-
-  DrawingUpdatedEvent({@required this.cur})
-      :
-      super([cur]);
+  final Picture picture;
+  DrawingUpdatedEvent({@required this.cur, @required this.picture, @required ReduxStateObject state})
+      : assert(cur != null), super(state, [cur, picture]);
 
 }
 
 class DrawingSaveImageEvent extends DrawingEvent{
-  final Image image;
-  final int offset;
-  DrawingSaveImageEvent({@required this.image, @required this.offset}) : assert(image != null), super([image, offset]);
+  final Picture image;
+  DrawingSaveImageEvent({@required this.image, @required ReduxStateObject state})
+      : assert(image != null), super(state, [image]);
+}
+
+class DrawingClearEvent extends DrawingEvent{
+  DrawingClearEvent({@required ReduxStateObject state}) : super(state);
 }

@@ -1,15 +1,21 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'temp_holder.dart';
 import 'dart:ui' as ui;
+import 'package:rxdart/rxdart.dart';
 
 import 'package:drawing_test3/src/blocs/drawing/drawing_bloc.dart';
 import 'package:drawing_test3/src/blocs/drawing/drawing_events.dart';
-import 'package:drawing_test3/src/blocs/drawing/drawing_states.dart';
+//import 'package:drawing_test3/src/blocs/drawing/drawing_states.dart';
+import 'package:drawing_test3/src/blocs/drawing/redux_state_object.dart';
 
 class DrawingHolder extends StatefulWidget {
   DrawingHolder({Key key, this.title, this.width, this.height})
       : super(key: key);
+
   final String title;
   final double width;
   final double height;
@@ -29,53 +35,53 @@ class _DrawingHolderState extends State<DrawingHolder> {
 
   _DrawingHolderState({this.width, this.height});
 
-  @override
-  void initState() {
-    super.initState();
-
-  }
-
-  void _onPanStart(BuildContext context, DragStartDetails details, ui.Image image) {
-    print("On tap");
+  void _onPanStart(BuildContext context, DragStartDetails details, ui.Picture image, ReduxStateObject state) {
     RenderBox box = context.findRenderObject();
     Offset tapPos = box.globalToLocal(details.globalPosition);
-    bloc.dispatch(DrawingUpdatedEvent(cur: List<Offset>()..add(tapPos)));
+    bloc.dispatch(DrawingUpdatedEvent(cur: List<Offset>()..add(tapPos), picture: state.image, state: state));
   }
 
   void _onPanUpdate(BuildContext context,
       DragUpdateDetails details,
       List<Offset> cur,
-      ui.Image image, MyCustomPainter painter, bool haveToSave) {
+      ui.Picture image, MyCustomPainter painter,
+      ReduxStateObject state) {
     RenderBox box = context.findRenderObject();
     Offset tapPos = box.globalToLocal(details.globalPosition);
-    if(haveToSave) {
-      _saveImage(cur, painter);
+    ui.Picture picture = state.image;
+    if(cur != null && cur.length > 20) {
+      picture = painter.savePicture();
+      cur = List();
     }
-    bloc.dispatch(DrawingUpdatedEvent(cur: cur..add(tapPos)));
+    bloc.dispatch(DrawingUpdatedEvent(cur: cur..add(tapPos), picture: picture, state: state));
   }
 
-  void _saveImage(List<Offset> cur, MyCustomPainter painter,) async {
+  /*void _saveImage(List<Offset> cur, MyCustomPainter painter,) async {
     ui.Image image = await painter.savePicture();
     bloc.dispatch(DrawingSaveImageEvent(image: image, offset: cur.length -1));
-  }
+  }*/
 
-  void _onPanUp(MyCustomPainter painter) async {
-    var image = await painter.savePicture();
-    bloc.dispatch(DrawingSaveImageEvent(image: image, offset: 0));
+  void _onPanUp(MyCustomPainter painter, ReduxStateObject state) {
+    var image = painter.savePicture();
+    bloc.dispatch(DrawingUpdatedEvent(cur: List(), picture: image, state: state));
     //holder.painter.endStroke();
   }
 
-  void clear() {
+  void _clear() {
     print("Clear!");
+    bloc.dispatch(DrawingClearEvent(
+      state: null
+    ));
   }
 
-  Widget getGestureDetector(List<Offset> current, ui.Image image, bool haveToSaveImage) {
+  Widget getGestureDetector(List<Offset> current, ui.Picture image, ReduxStateObject state) {
+
     MyCustomPainter painter = MyCustomPainter(current, image);
     return GestureDetector(
-        onPanStart: (DragStartDetails details) => _onPanStart(context, details, image),
+        onPanStart: (DragStartDetails details) => _onPanStart(context, details, image, state),
         onPanUpdate: (DragUpdateDetails details) =>
-            _onPanUpdate(context, details, current, image, painter, haveToSaveImage),
-        onPanEnd: (DragEndDetails details) => _onPanUp(painter),
+            _onPanUpdate(context, details, current, image, painter, state),
+        onPanEnd: (DragEndDetails details) => _onPanUp(painter, state),
         child: RepaintBoundary(
           child: CustomPaint(
             painter: painter,
@@ -86,35 +92,32 @@ class _DrawingHolderState extends State<DrawingHolder> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-
+    Provider.of<PublishSubject<String>>(context).listen((event) => _clear());
     return BlocBuilder(
       bloc: bloc,
       builder: (context, state) {
-
-        if(state is DrawingEmpty) {
-          return Center(
-              child: SizedBox.expand(
-                child: getGestureDetector(List<ui.Offset>(), null, false),
-              ));
-        }
-        if(state is DrawingLoaded) {
-          return Center(
-              child: SizedBox.expand(
-                child: getGestureDetector(state.cur, state.image, state.haveToSaveImage),
-              ));
-        }
+        return Center(
+            child: SizedBox.expand(
+              child: getGestureDetector(state.cur, state.image, state),
+            ));
       }
     );
   }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
 }
 
 
 class MyCustomPainter extends ChangeNotifier implements CustomPainter {
   //final List<ui.Image> backUp = new List();
   final List<Offset> current;
-  Color chosenColor = Colors.amberAccent;
-  final ui.Image image;
+  final Color chosenColor = Colors.amberAccent;
+  final ui.Picture image;
   Size _size;
 
   MyCustomPainter(this.current, this.image,);
@@ -122,15 +125,6 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
   @override
   bool shouldRepaint(MyCustomPainter old) {
     return true;
-  }
-
-  void clearAll() {
-    //_image = null;
-    notifyListeners();
-  }
-
-  void setColor(Color color) {
-    chosenColor = color;
   }
 
   bool hitTest(Offset position) => null;
@@ -141,6 +135,8 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
   SemanticsBuilderCallback get semanticsBuilder => null;
 
   void paint(Canvas canvas, Size size) {
+    print("paint");
+
     Paint paint = Paint()
     //..color = chosenColor
       ..strokeCap = StrokeCap.round
@@ -148,7 +144,9 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
       ..style = PaintingStyle.stroke;
 
     if (image != null) {
-      canvas.drawImage(image, Offset(0.0, 0.0), paint);
+      //canvas.drawImage(image, Offset(0.0, 0.0), paint);
+      print(image.approximateBytesUsed);
+      canvas.drawPicture(image);
     }
 
     if (size != null) {
@@ -164,7 +162,7 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
 
   }
 
-  Future<ui.Image> savePicture() async {
+  ui.Picture savePicture() {
     final recorder = new ui.PictureRecorder();
     final canvas = Canvas(recorder,
         Rect.fromPoints(Offset(0.0, 0.0), Offset(_size.width, _size.height)));
@@ -172,12 +170,12 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
     paint(canvas, null);
 
     final picture = recorder.endRecording();
-    final img = await picture.toImage(375, 812);
-    return img;
+    //final img = await picture.toImage(375, 812);
+    return picture;
     //final pngBytes = await img.toByteData(format: ImageByteFormat.png);
   }
 
-  ui.Image getImage() {
+  /*ui.Image getImage() {
     return image;
-  }
+  }*/
 }

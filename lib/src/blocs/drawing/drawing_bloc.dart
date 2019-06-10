@@ -3,51 +3,51 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'drawing_events.dart';
 import 'drawing_states.dart';
+import 'redux_state_object.dart';
 
 
-class DrawingBloc extends Bloc<DrawingEvent, DrawingState> {
+class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
-  Image _lastSavedImage;
-  int _offset = 0;
-  int _counter = 0;
-
-  @override
-  DrawingState get initialState => DrawingEmpty();
+  //Picture _lastSavedImage;
+  //final BehaviorSubject<Image> imageStream = BehaviorSubject();
 
   @override
-  Stream<DrawingState> mapEventToState(DrawingEvent event) async* {
+  ReduxStateObject get initialState => ReduxStateObject(null, null);
+
+  @override
+  Stream<ReduxStateObject> mapEventToState(DrawingEvent event) async* {
     if (event is DrawingUpdatedEvent) {
       //yield DrawingLoading();
       try {
-        if(_counter > 15)_counter = 0;
-        if(event.cur.length < _offset)_offset = 0;
-        print("copy from " + _offset.toString() + " to " + (event.cur.length -1).toString());
-        var toDraw = event.cur.sublist(_offset, event.cur.length -1);
-        yield DrawingLoaded(cur: toDraw, image: _lastSavedImage,haveToSaveImage: _counter > 14 ? true : false);
-        _counter++;
+        yield ReduxStateObject(event.cur, event.picture);
       } catch (e) {
         print(e.toString());
-        yield DrawingEmpty();
+        yield ReduxStateObject(null, null);
       }
     }
 
     if(event is DrawingSaveImageEvent) {
-      _lastSavedImage = event.image;
-      _offset = event.offset;
+      //_lastSavedImage = event.image;
     }
 
-    /*
-    if (event is RefreshWeather) {
+    if(event is DrawingClearEvent) {
       try {
-        final Weather weather = await weatherRepository.getWeather(event.city);
-        yield WeatherLoaded(weather: weather);
-      } catch (_) {
-        yield currentState;
+        //_lastSavedImage = null;
+        yield ReduxStateObject(null, null);
+      } catch (e) {
+        print(e.toString());
+        yield ReduxStateObject(null, null);
       }
     }
-    */
+  }
+
+  @override
+  void dispose() {
+    //imageStream.close();
+    super.dispose();
   }
 }

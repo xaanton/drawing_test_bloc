@@ -14,8 +14,9 @@ class DrawingLoading extends DrawingState {}
 class DrawingLoaded extends DrawingState {
   final Image image;
   final List<Offset> cur;
-  final bool haveToSaveImage;
-  DrawingLoaded({@required this.image, @required this.cur, @required this.haveToSaveImage})
+  DrawingLoaded({@required this.image,
+    @required this.cur,
+  })
       :
       super([image, cur]);
 }
