@@ -12,35 +12,35 @@ import 'redux_state_object.dart';
 
 class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
-  //Picture _lastSavedImage;
+  Image _lastSavedImage;
   //final BehaviorSubject<Image> imageStream = BehaviorSubject();
 
   @override
-  ReduxStateObject get initialState => ReduxStateObject(null, null);
+  ReduxStateObject get initialState => ReduxStateObject(null, null, null);
 
   @override
   Stream<ReduxStateObject> mapEventToState(DrawingEvent event) async* {
     if (event is DrawingUpdatedEvent) {
       //yield DrawingLoading();
       try {
-        yield ReduxStateObject(event.cur, event.picture);
+        yield ReduxStateObject(event.cur, event.picture, _lastSavedImage);
       } catch (e) {
         print(e.toString());
-        yield ReduxStateObject(null, null);
+        yield ReduxStateObject(null, null, null);
       }
     }
 
     if(event is DrawingSaveImageEvent) {
-      //_lastSavedImage = event.image;
+      _lastSavedImage = event.image;
     }
 
     if(event is DrawingClearEvent) {
       try {
         //_lastSavedImage = null;
-        yield ReduxStateObject(null, null);
+        yield ReduxStateObject(null, null, null);
       } catch (e) {
         print(e.toString());
-        yield ReduxStateObject(null, null);
+        yield ReduxStateObject(null, null, null);
       }
     }
   }

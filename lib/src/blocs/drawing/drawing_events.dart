@@ -13,13 +13,14 @@ class DrawingUpdatedEvent extends DrawingEvent {
 
   final List<Offset> cur;
   final Picture picture;
-  DrawingUpdatedEvent({@required this.cur, @required this.picture, @required ReduxStateObject state})
+  final Image image;
+  DrawingUpdatedEvent({@required this.cur, @required this.picture, @required ReduxStateObject state, @required this.image})
       : assert(cur != null), super(state, [cur, picture]);
 
 }
 
 class DrawingSaveImageEvent extends DrawingEvent{
-  final Picture image;
+  final Image image;
   DrawingSaveImageEvent({@required this.image, @required ReduxStateObject state})
       : assert(image != null), super(state, [image]);
 }
