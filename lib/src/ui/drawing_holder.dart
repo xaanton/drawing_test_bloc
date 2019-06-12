@@ -143,7 +143,6 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
 
   void paint(Canvas canvas, Size size) {
     print("paint");
-
     Paint paint = Paint()
     //..color = chosenColor
       ..strokeCap = StrokeCap.round
@@ -164,12 +163,16 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
       _size = size;
     }
 
-    if(this.current != null && this.current.length > 0) {
+    if(this.current != null && this.current.length > 1) {
       paint.color = chosenColor;
       Path strokePath = new Path();
       strokePath.addPolygon(current, false);
       canvas.drawPath(strokePath, paint);
+    } else if(this.current != null && this.current.length > 0) {
+      paint.color = chosenColor;
+      canvas.drawPoints(ui.PointMode.points, current, paint);
     }
+
   }
 
   ui.Picture savePicture() {
