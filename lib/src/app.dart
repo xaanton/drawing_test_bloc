@@ -10,6 +10,7 @@ class FlutterDrawing extends StatelessWidget {
   final String title;
   final PublishSubject<String> test = PublishSubject();
 
+  /*
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -29,6 +30,20 @@ class FlutterDrawing extends StatelessWidget {
           child: Icon(Icons.add),
         ), // This trailing comma makes auto-formatting nicer for build methods.
       ),
+    );
+  }
+  */
+
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    return Scaffold(
+    appBar: AppBar(
+    title: Text(title),
+    ),
+    body: MyMasterPiece(title: "Test", width: width, height: height,),
+     // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

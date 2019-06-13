@@ -38,7 +38,11 @@ class _DrawingHolderState extends State<DrawingHolder> {
   void _onPanStart(BuildContext context, DragStartDetails details, ui.Picture picture, ReduxStateObject state) {
     RenderBox box = context.findRenderObject();
     Offset tapPos = box.globalToLocal(details.globalPosition);
-    bloc.dispatch(DrawingUpdatedEvent(cur: List<Offset>()..add(tapPos), picture: state.picture, state: state));
+
+    List cur = state.cur;
+    if(cur == null)cur = List<Offset>();
+
+    bloc.dispatch(DrawingUpdatedEvent(cur: cur..add(tapPos), image: state.image, picture: state.picture, state: state));
   }
 
   void _onPanUpdate(BuildContext context,
@@ -54,6 +58,9 @@ class _DrawingHolderState extends State<DrawingHolder> {
       picture = painter.savePicture();
       cur = List();
     }*/
+    List cur = state.cur;
+    if(cur == null)cur = List<Offset>();
+    if(cur.length > 120)_backupImage(painter, cur, state);
     bloc.dispatch(DrawingUpdatedEvent(cur: cur..add(tapPos), picture: picture, image: state.image, state: state));
   }
 
@@ -62,11 +69,19 @@ class _DrawingHolderState extends State<DrawingHolder> {
     bloc.dispatch(DrawingSaveImageEvent(image: image, offset: cur.length -1));
   }*/
 
-  void _onPanUp(MyCustomPainter painter, ReduxStateObject state) async {
+  void _onPanUp(MyCustomPainter painter, ReduxStateObject state) {
+    List cur = state.cur;
+    if(cur == null)cur = List<Offset>();
+    //cur..add(null);
+    _backupImage(painter, cur, state);
+    bloc.dispatch(DrawingUpdatedEvent(cur: cur, picture: null, image: state.image, state: state));
+  }
+
+  void _backupImage(MyCustomPainter painter, List<Offset> cur, ReduxStateObject state) async {
     var image = await painter.saveImage();
     //bloc.dispatch(DrawingUpdatedEvent(cur: List(), picture: state.picture, image: image, state: state));
-    bloc.dispatch(DrawingSaveImageEvent(image: image, state: state));
-    //holder.painter.endStroke();
+    int lastIndex = cur == null ? -1 : cur.length -1;
+    bloc.dispatch(DrawingSaveImageEvent(image: image, state: state, lastIndex: lastIndex));
   }
 
   void _clear() {
@@ -163,7 +178,7 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
       _size = size;
     }
 
-    if(this.current != null && this.current.length > 1) {
+    if (this.current != null && this.current.length > 1) {
       paint.color = chosenColor;
       Path strokePath = new Path();
       strokePath.addPolygon(current, false);

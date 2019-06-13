@@ -21,7 +21,8 @@ class DrawingUpdatedEvent extends DrawingEvent {
 
 class DrawingSaveImageEvent extends DrawingEvent{
   final Image image;
-  DrawingSaveImageEvent({@required this.image, @required ReduxStateObject state})
+  final int lastIndex;
+  DrawingSaveImageEvent({@required this.image, @required this.lastIndex, @required ReduxStateObject state})
       : assert(image != null), super(state, [image]);
 }
 

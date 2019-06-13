@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'temp_holder.dart';
+import 'temp_holder2.dart';
 import 'dart:ui';
 
 class MyMasterPiece extends StatefulWidget {
@@ -54,20 +54,39 @@ class _MyMasterPieceState extends State<MyMasterPiece> {
   }
 
   Widget getGestureDetector() {
-    return GestureDetector(
-        onPanStart: (DragStartDetails details) => _onPanStart(context, details),
-        onPanUpdate: (DragUpdateDetails details) =>
-            _onPanUpdate(context, details),
-        onPanEnd: (DragEndDetails details) => _onPanUp(),
-        child: Container(child: holder));
+    return Center(
+
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+
+          children: <Widget>[
+            Expanded(
+              flex: 10,
+                child:
+                SizedBox.expand(
+                  //color: Colors.green,
+                  child: GestureDetector(
+                      child: holder,
+                      onPanStart: (DragStartDetails details) => _onPanStart(context, details),
+                      onPanUpdate: (DragUpdateDetails details) =>
+                      _onPanUpdate(context, details),
+                      onPanEnd: (DragEndDetails details) => _onPanUp(),
+                  ),
+                )
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                color: Colors.red,
+                child: FlatButton(onPressed: () => holder.painter.clearAll(), child: Icon(Icons.assistant_photo)),),
+            )
+          ],
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Center(
-        child: SizedBox.expand(
-      child: getGestureDetector(),
-    ));
+    return getGestureDetector();
   }
 }

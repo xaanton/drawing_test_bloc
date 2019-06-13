@@ -11,12 +11,12 @@ class MasterPieceHolder extends StatelessWidget {
   final MasterPiecePainter painter;
 
   MasterPieceHolder({this.height, this.width, this.image})
-      : painter = new MasterPiecePainter();
+      : painter = new MasterPiecePainter(imageStream: PublishSubject<Temp>(), offsetStream: PublishSubject<Offset>());
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue[50],
+      //color: Colors.blue[50],
       child: RepaintBoundary(
         child: CustomPaint(
           painter: painter,
@@ -30,15 +30,20 @@ class MasterPieceHolder extends StatelessWidget {
 
 class MasterPiecePainter extends ChangeNotifier implements CustomPainter {
   //final List<ui.Image> backUp = new List();
-  final List<Offset> current = new List();
+  List<List<Offset>> backUp = new List();
+  List<Offset> current = new List();
   Color chosenColor = Colors.amberAccent;
   ui.Image _image;
+  Temp temp;
   Size _size;
-  final PublishSubject<ui.Image> imageStream;
+  final PublishSubject<Temp> imageStream;
   final PublishSubject<Offset> offsetStream;
 
   MasterPiecePainter({this.imageStream, this.offsetStream}) {
-    imageStream.listen((newImage) {_image = newImage;});
+    imageStream.listen((temp) {
+      _image = temp.image;
+      backUp = backUp.sublist(temp.lastIndex);
+    });
   }
 
   @override
@@ -48,7 +53,9 @@ class MasterPiecePainter extends ChangeNotifier implements CustomPainter {
 
   void startStroke(Offset position) {
     print("startStroke");
-    current.add(position);
+    backUp.add(current);
+    List<Offset> newList = List();
+    current = newList..add(position);
     notifyListeners();
   }
 
@@ -58,9 +65,8 @@ class MasterPiecePainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  void endStroke() async {
-    await savePicture();
-    current.clear();
+  void endStroke() {
+    savePicture();
     notifyListeners();
   }
 
@@ -94,14 +100,30 @@ class MasterPiecePainter extends ChangeNotifier implements CustomPainter {
     if (size != null) {
       _size = size;
     }
+    if(current.length > 20) {
+      List<Offset> newList = List();
+      newList.add(current.last);
+      backUp.add(current);
+      current = newList;
+      savePicture();
+    }
+    backUp.forEach((el) {
+      paint.color = chosenColor;
+      Path strokePath = new Path();
+      strokePath.addPolygon(el, false);
+      canvas.drawPath(strokePath, paint);
+    });
+    if(current.length > 0) {
+      paint.color = chosenColor;
+      Path strokePath = new Path();
+      strokePath.addPolygon(current, false);
+      canvas.drawPath(strokePath, paint);
+    }
 
-    paint.color = chosenColor;
-    Path strokePath = new Path();
-    strokePath.addPolygon(current, false);
-    canvas.drawPath(strokePath, paint);
   }
 
   Future<void> savePicture() async {
+    final lastIndex = backUp.length-1;
     final recorder = new ui.PictureRecorder();
     final canvas = Canvas(recorder,
         Rect.fromPoints(Offset(0.0, 0.0), Offset(_size.width, _size.height)));
@@ -112,6 +134,10 @@ class MasterPiecePainter extends ChangeNotifier implements CustomPainter {
 
     final img = await picture.toImage(375, 812);
     _image = img;
+    Temp temp = Temp();
+    temp.image = _image;
+    temp.lastIndex = lastIndex;
+    imageStream.add(temp);
     print("done!");
     //final pngBytes = await img.toByteData(format: ImageByteFormat.png);
   }
@@ -119,6 +145,11 @@ class MasterPiecePainter extends ChangeNotifier implements CustomPainter {
   ui.Image getImage() {
     return _image;
   }
+}
+
+class Temp{
+  ui.Image image;
+  int lastIndex;
 }
 
 /*
