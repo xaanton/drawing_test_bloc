@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'ui/temp.dart';
+//import 'ui/temp.dart';
 import 'ui/drawing_holder.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'ui/temp_holder4.dart';
 
 class FlutterDrawing extends StatelessWidget {
   FlutterDrawing({Key key, this.title}) : super(key: key);
@@ -40,9 +41,9 @@ class FlutterDrawing extends StatelessWidget {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
     appBar: AppBar(
-    title: Text(title),
+      title: Text(title),
     ),
-    body: MyMasterPiece(title: "Test", width: width, height: height,),
+    body: Center(child: MyMasterPiece(title: "Test", width: width, height: height,)),
      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
