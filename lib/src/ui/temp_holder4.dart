@@ -95,6 +95,8 @@ class MasterPieceHolder extends StatelessWidget {
           print(state.runtimeType);
           if(state.cur != null) {
             print(state.cur.length);
+          } else {
+            print("Everything is lost!");
           }
           return SizedBox.expand(
                 child: GestureDetector(
