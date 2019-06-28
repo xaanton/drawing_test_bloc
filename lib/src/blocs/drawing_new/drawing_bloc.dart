@@ -25,9 +25,12 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   //Temp temp;
   final BehaviorSubject<Temp> imageStream = new BehaviorSubject();
   final BehaviorSubject<Offset> offsetStream = new BehaviorSubject();
+  final BehaviorSubject<ReduxStateObject> stateStream = new BehaviorSubject();
+  final BehaviorSubject<bool> isSavingStream = new BehaviorSubject();
   //final PublishSubject<Offset> offsetStream;
-  StreamSubscription<Offset> t;
+  //StreamSubscription<Offset> t;
   DrawingBloc() {
+    /*
     t = offsetStream.listen((offset) {
       if(current == null) {
         current = new List();
@@ -48,11 +51,25 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
         backUp = backUp.sublist(temp.lastIndex);
       }
     });
+    */
+    isSavingStream.distinct((p,n) => p == n);
+    isSavingStream.add(false);
+    stateStream.listen((state) {
+      this.dispatch(DrawingRedrawEvent(state: state));
+    });
 
    }
 
+  ReduxStateObject getInitialState() {
+    return ReduxStateObject(List(), List(), null, false);
+  }
+
+  bool shouldSave(int backUpLength) {
+    print("backup length = " + backUpLength.toString());
+    return backUpLength > 1 && isSavingStream.value == false;
+  }
   @override
-  ReduxStateObject get initialState => ReduxStateObject(null, null, null, false);
+  ReduxStateObject get initialState => this.getInitialState();
 
   @override
   Stream<DrawingEvent> transform(Stream<DrawingEvent> events) {
@@ -74,19 +91,15 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     });
   }
 
-  Future<Image> test() async {
-    //if(imageStream.length > 0)
-    //int i = await offsetStream.length;
-    //Temp ts = await imageStream.stream.;
-    //await imageStream.last;
-    //Image lImage = temp.image;
-    //return lImage;
-    return null;
-  }
-
   @override
   Stream<ReduxStateObject> mapEventToState(DrawingEvent event) async* {
     print("event = " + event.runtimeType.toString());
+
+    if (event is DrawingRedrawEvent) {
+      yield event.state;
+    }
+
+    /*
     if (event is DrawingUpdatedEvent) {
       //yield DrawingLoading();
 
@@ -106,27 +119,66 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
         yield ReduxStateObject(null, null, null, false);
       }
     }
+    */
+
+    if(event is DrawingUpdatedEvent) {
+      ReduxStateObject curState = stateStream.value;
+      List<Offset> newCur = curState.cur;
+      List<List<Offset>> newBackUp = curState.backup;
+      if(event.cur != null) newCur.add(event.cur);
+      if(newCur.length > 50 || event.cur == null) {
+        newBackUp.add(newCur);
+        newCur = new List();
+        if(event.cur != null) newCur.add(event.cur);
+      }
+
+      ReduxStateObject newState = ReduxStateObject(
+          newCur,
+          newBackUp,
+          curState.image,
+          shouldSave(curState.backup.length)
+      );
+      stateStream.add(newState);
+    }
 
     if(event is DrawingSaveInitEvent) {
-      isSavingNow = true;
+      /*ReduxStateObject curState = stateStream.value;
+      ReduxStateObject newState = ReduxStateObject(
+          curState.cur,
+          curState.backup,
+          curState.image,
+          false
+      );
+      stateStream.add(newState);*/
+      isSavingStream.add(true);
     }
 
     if(event is DrawingSaveEvent) {
-      imageStream.add(Temp(event.image, event.lastIndex));
-      isSavingNow = false;
-      //yield ReduxStateObject(current, backUp, image, false);
+      isSavingStream.add(false);
+      ReduxStateObject curState = stateStream.value;
+      List<List<Offset>> newBackup = curState.backup;
+      print("last index = " + event.lastIndex.toString());
+      print("cur backup length = " + newBackup.length.toString());
+      if(newBackup.length -1 >= event.lastIndex && event.lastIndex > -1) {
+        newBackup = newBackup.sublist(event.lastIndex);
+      }
+
+      ReduxStateObject newState = ReduxStateObject(
+          curState.cur,
+          newBackup,
+          event.image,
+          shouldSave(newBackup.length)
+      );
+      stateStream.add(newState);
     }
 
     if(event is DrawingClearEvent) {
       try {
-        current = new List();
-        backUp = new List();
-        isSavingNow = false;
-        imageStream.add(Temp(null, -1));
-        yield ReduxStateObject(null, null, null, false);
+        ReduxStateObject newState = this.getInitialState();
+        stateStream.add(newState);
       } catch (e) {
         print(e.toString());
-        yield ReduxStateObject(null, null, null, false);
+        yield this.getInitialState();
       }
     }
   }
@@ -135,6 +187,8 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   void dispose() {
     imageStream.close();
     offsetStream.close();
+    stateStream.close();
+    isSavingStream.close();
     super.dispose();
   }
 

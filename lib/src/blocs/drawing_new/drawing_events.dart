@@ -11,10 +11,18 @@ abstract class DrawingEvent extends Equatable {
 class DrawingUpdatedEvent extends DrawingEvent {
 
   final Offset cur;
-  final Picture picture;
 
-  DrawingUpdatedEvent({@required this.cur, @required this.picture})
-      : super([cur, picture]);
+  DrawingUpdatedEvent({@required this.cur})
+      : super([cur]);
+
+}
+
+class DrawingRedrawEvent extends DrawingEvent {
+
+  final ReduxStateObject state;
+
+  DrawingRedrawEvent({@required this.state})
+      : assert(state != null), super([state]);
 
 }
 

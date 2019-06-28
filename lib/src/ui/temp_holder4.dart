@@ -65,18 +65,18 @@ class MasterPieceHolder extends StatelessWidget {
     RenderBox box = context.findRenderObject();
     print(details.globalPosition);
     Offset tapPos = box.globalToLocal(details.globalPosition);
-    bloc.dispatch(DrawingUpdatedEvent(cur: tapPos, picture: null));
+    bloc.dispatch(DrawingUpdatedEvent(cur: tapPos));
   }
 
   void _onPanUpdate(BuildContext context, DragUpdateDetails details) {
     RenderBox box = context.findRenderObject();
     print(details.globalPosition);
     Offset tapPos = box.globalToLocal(details.globalPosition);
-    bloc.dispatch(DrawingUpdatedEvent(cur: tapPos, picture: null));
+    bloc.dispatch(DrawingUpdatedEvent(cur: tapPos));
   }
 
   void _onPanUp() {
-    bloc.dispatch(DrawingUpdatedEvent(cur: null, picture: null));
+    bloc.dispatch(DrawingUpdatedEvent(cur: null));
     //this.painter.endStroke();
   }
 
@@ -170,7 +170,7 @@ class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
       canvas.drawImage(image, Offset(0.0, 0.0), paint);
     }
 
-    if (current != null && current.length > 0) {
+    if (backUp != null && backUp.length > 0) {
       backUp.forEach((el) {
         paint.color = chosenColor;
         Path strokePath = new Path();
