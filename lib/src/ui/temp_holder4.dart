@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-//import 'temp_holder2.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
@@ -126,7 +125,6 @@ class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
   final ui.Image image;
   final DrawingBloc bloc;
   final shouldSave;
-  Size _size;
 
   MyDrawingPainter(this.current, this.backUp, this.image, this.bloc, this.shouldSave);
 
@@ -187,6 +185,7 @@ class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
     }
 
   }
+
 
   Future<void> savePicture(Picture picture, Size size) async {
     bloc.dispatch(DrawingSaveInitEvent());

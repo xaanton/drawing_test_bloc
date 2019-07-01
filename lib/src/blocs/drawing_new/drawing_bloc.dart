@@ -2,14 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'drawing_events.dart';
-import 'drawing_states.dart';
 import 'redux_state_object.dart';
-import 'temp.dart';
 
 export 'temp.dart';
 export 'redux_state_object.dart';
@@ -18,46 +15,15 @@ export 'drawing_events.dart';
 
 class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
-  List<List<Offset>> backUp = new List();
-  List<Offset> current = new List();
-  Image image;
-  bool isSavingNow = false;
-  //Temp temp;
-  final BehaviorSubject<Temp> imageStream = new BehaviorSubject();
-  final BehaviorSubject<Offset> offsetStream = new BehaviorSubject();
   final BehaviorSubject<ReduxStateObject> stateStream = new BehaviorSubject();
   final BehaviorSubject<bool> isSavingStream = new BehaviorSubject();
-  //final PublishSubject<Offset> offsetStream;
-  //StreamSubscription<Offset> t;
-  DrawingBloc() {
-    /*
-    t = offsetStream.listen((offset) {
-      if(current == null) {
-        current = new List();
-      }
-      print("listener: " + offset.toString());
-      if(offset != null) current.add(offset);
-      if(current.length > 50 || offset == null) {
-        backUp.add(current);
-        current = new List();
-        if(offset != null) current.add(offset);
-      }
-    });
 
-    imageStream.listen((temp) {
-      print(imageStream.length);
-      image = temp.image;
-      if(backUp.length -1 > temp.lastIndex && temp.lastIndex > -1) {
-        backUp = backUp.sublist(temp.lastIndex);
-      }
-    });
-    */
+  DrawingBloc() {
     isSavingStream.distinct((p,n) => p == n);
     isSavingStream.add(false);
     stateStream.listen((state) {
       this.dispatch(DrawingRedrawEvent(state: state));
     });
-
    }
 
   ReduxStateObject getInitialState() {
@@ -65,7 +31,6 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   }
 
   bool shouldSave(int backUpLength) {
-    print("backup length = " + backUpLength.toString());
     return backUpLength > 1 && isSavingStream.value == false;
   }
   @override
@@ -99,28 +64,6 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
       yield event.state;
     }
 
-    /*
-    if (event is DrawingUpdatedEvent) {
-      //yield DrawingLoading();
-
-      try {
-        Image lImage;
-
-        if(imageStream.hasValue) {
-          Temp temp = imageStream.value;
-          lImage = temp.image;
-        }
-        print("event handler: " + event.cur.toString());
-        offsetStream.add(event.cur);
-        print("cur length " + current.length.toString());
-        yield ReduxStateObject(current, backUp, lImage, backUp.length > 0 && isSavingNow == false);
-      } catch (e) {
-        print(e.toString());
-        yield ReduxStateObject(null, null, null, false);
-      }
-    }
-    */
-
     if(event is DrawingUpdatedEvent) {
       ReduxStateObject curState = stateStream.value;
       List<Offset> newCur = curState.cur;
@@ -142,14 +85,6 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     }
 
     if(event is DrawingSaveInitEvent) {
-      /*ReduxStateObject curState = stateStream.value;
-      ReduxStateObject newState = ReduxStateObject(
-          curState.cur,
-          curState.backup,
-          curState.image,
-          false
-      );
-      stateStream.add(newState);*/
       isSavingStream.add(true);
     }
 
@@ -157,8 +92,6 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
       isSavingStream.add(false);
       ReduxStateObject curState = stateStream.value;
       List<List<Offset>> newBackup = curState.backup;
-      print("last index = " + event.lastIndex.toString());
-      print("cur backup length = " + newBackup.length.toString());
       if(newBackup.length -1 >= event.lastIndex && event.lastIndex > -1) {
         newBackup = newBackup.sublist(event.lastIndex);
       }
@@ -185,8 +118,6 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
   @override
   void dispose() {
-    imageStream.close();
-    offsetStream.close();
     stateStream.close();
     isSavingStream.close();
     super.dispose();
