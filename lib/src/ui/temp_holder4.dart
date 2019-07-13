@@ -58,7 +58,6 @@ class MasterPieceHolder extends StatelessWidget {
   final double height;
   final double width;
   final DrawingBloc bloc = DrawingBloc();
-  //final MasterPiecePainter painter;
 
   void _onPanStart(BuildContext context, DragStartDetails details) {
     RenderBox box = context.findRenderObject();
@@ -76,7 +75,6 @@ class MasterPieceHolder extends StatelessWidget {
 
   void _onPanUp() {
     bloc.dispatch(DrawingUpdatedEvent(cur: null));
-    //this.painter.endStroke();
   }
 
   void clear() {
@@ -91,27 +89,28 @@ class MasterPieceHolder extends StatelessWidget {
     return BlocBuilder<ReduxStateObject>(
         bloc: bloc,
         builder: (context, state) {
-          print(state.runtimeType);
-          if(state.cur != null) {
-            print(state.cur.length);
-          } else {
-            print("Everything is lost!");
-          }
-          return SizedBox.expand(
-                child: GestureDetector(
-                  child: RepaintBoundary(
-                    child: CustomPaint(
-                      painter: MyDrawingPainter(state.cur, state.backup, state.image, bloc, state.shouldSave),
-                      isComplex: true,
-                      willChange: false,
-                    ),
+          if(state != null) {
+            return SizedBox.expand(
+              child: GestureDetector(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(state.cur, state.backup, state.image, bloc, state.shouldSave),
+                    isComplex: true,
+                    willChange: false,
                   ),
-                  onPanStart: (DragStartDetails details) => _onPanStart(context, details),
-                  onPanUpdate: (DragUpdateDetails details) =>
-                      _onPanUpdate(context, details),
-                  onPanEnd: (DragEndDetails details) => _onPanUp(),
                 ),
-              );
+                onPanStart: (DragStartDetails details) => _onPanStart(context, details),
+                onPanUpdate: (DragUpdateDetails details) =>
+                    _onPanUpdate(context, details),
+                onPanEnd: (DragEndDetails details) => _onPanUp(),
+              ),
+            );
+          } else {
+            return Center(
+              child: RefreshProgressIndicator()
+            );
+          }
+
         }
     );
   }
@@ -121,7 +120,7 @@ class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
 
   final List<List<Offset>> backUp;
   final List<Offset> current;
-  Color chosenColor = Colors.amberAccent;
+  Color chosenColor = Colors.indigoAccent;
   final ui.Image image;
   final DrawingBloc bloc;
   final shouldSave;
@@ -202,13 +201,3 @@ class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
     return image;
   }
 }
-
-
-/*
-  CustomPaint
-  CustomPainter
-
-  decodeImageFromList() = ui.Image
-  SizedBox for resizing image
-  FittedBox for fitting and scaling
- */

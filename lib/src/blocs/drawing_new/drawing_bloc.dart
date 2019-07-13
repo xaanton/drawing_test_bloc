@@ -24,6 +24,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     stateStream.listen((state) {
       this.dispatch(DrawingRedrawEvent(state: state));
     });
+    stateStream.add(initialState);
    }
 
   ReduxStateObject getInitialState() {
@@ -33,6 +34,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   bool shouldSave(int backUpLength) {
     return backUpLength > 1 && isSavingStream.value == false;
   }
+
   @override
   ReduxStateObject get initialState => this.getInitialState();
 
@@ -69,7 +71,8 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
       List<Offset> newCur = curState.cur;
       List<List<Offset>> newBackUp = curState.backup;
       if(event.cur != null) newCur.add(event.cur);
-      if(newCur.length > 50 || event.cur == null) {
+      if(newCur.length > 20 || event.cur == null) {
+        print("Recreating the lists");
         newBackUp.add(newCur);
         newCur = new List();
         if(event.cur != null) newCur.add(event.cur);
