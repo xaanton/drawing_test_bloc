@@ -118,8 +118,8 @@ class MasterPieceHolder extends StatelessWidget {
 
 class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
 
-  final List<List<Offset>> backUp;
-  final List<Offset> current;
+  final List<DrawingObject> backUp;
+  final DrawingObject current;
   Color chosenColor = Colors.indigoAccent;
   final ui.Image image;
   final DrawingBloc bloc;
@@ -167,20 +167,24 @@ class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
       canvas.drawImage(image, Offset(0.0, 0.0), paint);
     }
 
-    if (backUp != null && backUp.length > 0) {
+    if (backUp != null) {
       backUp.forEach((el) {
-        paint.color = chosenColor;
-        Path strokePath = new Path();
+        //paint.color = chosenColor;
+        /*Path strokePath = new Path();
         strokePath.addPolygon(el, false);
-        canvas.drawPath(strokePath, paint);
+        canvas.drawPath(strokePath, paint);*/
+        //el.color = chosenColor;
+        el.drawObject(canvas, paint);
       });
     }
 
-    if (current != null && current.length > 0) {
-      paint.color = chosenColor;
-      Path strokePath = new Path();
+    if (current != null) {
+      //paint.color = chosenColor;
+      /*Path strokePath = new Path();
       strokePath.addPolygon(current, false);
-      canvas.drawPath(strokePath, paint);
+      canvas.drawPath(strokePath, paint);*/
+      //current.color = chosenColor;
+      current.drawObject(canvas, paint);
     }
 
   }

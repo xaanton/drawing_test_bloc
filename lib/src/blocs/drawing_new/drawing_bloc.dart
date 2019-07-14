@@ -13,6 +13,7 @@ export 'redux_state_object.dart';
 export 'drawing_events.dart';
 
 
+
 class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
   final BehaviorSubject<ReduxStateObject> stateStream = new BehaviorSubject();
@@ -28,7 +29,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
    }
 
   ReduxStateObject getInitialState() {
-    return ReduxStateObject(List(), List(), null, false);
+    return ReduxStateObject(CustomPath(), List(), null, false);
   }
 
   bool shouldSave(int backUpLength) {
@@ -60,7 +61,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
   @override
   Stream<ReduxStateObject> mapEventToState(DrawingEvent event) async* {
-    print("event = " + event.runtimeType.toString());
+    print("event2 = " + event.runtimeType.toString());
 
     if (event is DrawingRedrawEvent) {
       yield event.state;
@@ -68,14 +69,14 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
     if(event is DrawingUpdatedEvent) {
       ReduxStateObject curState = stateStream.value;
-      List<Offset> newCur = curState.cur;
-      List<List<Offset>> newBackUp = curState.backup;
-      if(event.cur != null) newCur.add(event.cur);
-      if(newCur.length > 20 || event.cur == null) {
+      DrawingObject newCur = curState.cur;
+      List<DrawingObject> newBackUp = curState.backup;
+      if(event.cur != null) newCur.handleTap(event.cur);
+      if(newCur.shouldBackupNow() || event.cur == null) {
         print("Recreating the lists");
         newBackUp.add(newCur);
-        newCur = new List();
-        if(event.cur != null) newCur.add(event.cur);
+        newCur = newCur.getEmptyInstance();
+        if(event.cur != null) newCur.handleTap(event.cur);
       }
 
       ReduxStateObject newState = ReduxStateObject(
@@ -94,7 +95,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     if(event is DrawingSaveEvent) {
       isSavingStream.add(false);
       ReduxStateObject curState = stateStream.value;
-      List<List<Offset>> newBackup = curState.backup;
+      List<DrawingObject> newBackup = curState.backup;
       if(newBackup.length -1 >= event.lastIndex && event.lastIndex > -1) {
         newBackup = newBackup.sublist(event.lastIndex);
       }
