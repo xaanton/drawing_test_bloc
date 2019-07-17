@@ -74,7 +74,7 @@ class MasterPieceHolder extends StatelessWidget {
   }
 
   void _onPanUp() {
-    bloc.dispatch(DrawingUpdatedEvent(cur: null));
+    bloc.dispatch(DrawingOverEvent());
   }
 
   void clear() {

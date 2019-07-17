@@ -29,7 +29,11 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
    }
 
   ReduxStateObject getInitialState() {
-    return ReduxStateObject(CustomPath(), List(), null, false);
+    //return ReduxStateObject(CustomPath(), List(), null, false);
+    //return ReduxStateObject(Rectangle(), List(), null, false);
+    //return ReduxStateObject(Oval(), List(), null, false);
+    return ReduxStateObject(RectangleInCircle(), List(), null, false);
+
   }
 
   bool shouldSave(int backUpLength) {
@@ -73,7 +77,6 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
       List<DrawingObject> newBackUp = curState.backup;
       if(event.cur != null) newCur.handleTap(event.cur);
       if(newCur.shouldBackupNow() || event.cur == null) {
-        print("Recreating the lists");
         newBackUp.add(newCur);
         newCur = newCur.getEmptyInstance();
         if(event.cur != null) newCur.handleTap(event.cur);
@@ -118,6 +121,23 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
         yield this.getInitialState();
       }
     }
+
+    if(event is DrawingOverEvent) {
+      ReduxStateObject curState = stateStream.value;
+      DrawingObject newCur = curState.cur;
+      List<DrawingObject> newBackUp = curState.backup;
+      newBackUp.add(newCur);
+      newCur = newCur.getEmptyInstance();
+
+      ReduxStateObject newState = ReduxStateObject(
+          newCur,
+          newBackUp,
+          curState.image,
+          shouldSave(curState.backup.length)
+      );
+      stateStream.add(newState);
+    }
+
   }
 
   @override
