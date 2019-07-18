@@ -43,3 +43,7 @@ class DrawingClearEvent extends DrawingEvent {
 class DrawingOverEvent extends DrawingEvent {
 
 }
+class DrawingChangeObjectEvent extends DrawingEvent {
+  final DrawingObject newObject;
+  DrawingChangeObjectEvent(this.newObject);
+}

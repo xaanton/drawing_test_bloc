@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 import 'redux_state_object.dart';
+import 'package:drawing_test3/src/objects/drawing_object.dart';
 
 abstract class DrawingEvent extends Equatable {
   final ReduxStateObject state;
@@ -28,4 +29,9 @@ class DrawingSaveImageEvent extends DrawingEvent{
 
 class DrawingClearEvent extends DrawingEvent{
   DrawingClearEvent({@required ReduxStateObject state}) : super(state);
+}
+
+class DrawingChangeObjectEvent extends DrawingEvent {
+  final DrawingObject newObject;
+  DrawingChangeObjectEvent(this.newObject) : super(null, [newObject]);
 }

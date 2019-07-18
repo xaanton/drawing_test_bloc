@@ -43,10 +43,52 @@ class _MyMasterPieceState extends State<MyMasterPiece> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(flex: 10,child: holder),
-          Flexible(fit: FlexFit.tight,child: Center(child: FlatButton(
-            color: Colors.blueAccent,
+          Row(children: <Widget>[
+            FlatButton(
+              color: Colors.blueAccent,
               onPressed: () => holder.bloc.dispatch(DrawingClearEvent()),
-              child: Text("Clear"))))
+              child: Text("Clear")
+            ),
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(StarFive())),
+                child: Text("Star5")
+            ),
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(StarEight())),
+                child: Text("Star8")
+            ),
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(StarSixteen())),
+                child: Text("Star16")
+            ),
+          ],
+          ),
+          Row(children: <Widget>[
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(Oval())),
+                child: Text("Oval")
+            ),
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(Flower())),
+                child: Text("Flower")
+            ),
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(CustomPath())),
+                child: Text("Stroke")
+            ),
+            FlatButton(
+                color: Colors.blueAccent,
+                onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(Rectangle())),
+                child: Text("Rect")
+            ),
+          ],
+          )
         ],
     );
   }

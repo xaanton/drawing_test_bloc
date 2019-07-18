@@ -141,6 +141,19 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
       stateStream.add(newState);
     }
 
+    if(event is DrawingChangeObjectEvent) {
+      ReduxStateObject curState = stateStream.value;
+      DrawingObject newCur = event.newObject;
+      List<DrawingObject> newBackUp = curState.backup;
+      ReduxStateObject newState = ReduxStateObject(
+          newCur,
+          newBackUp,
+          curState.image,
+          shouldSave(curState.backup.length)
+      );
+      stateStream.add(newState);
+    }
+
   }
 
   @override
