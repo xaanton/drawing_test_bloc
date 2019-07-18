@@ -20,18 +20,10 @@ class RectangleInCircle extends DrawingObject {
 
       //Rect rect = Rect.fromPoints(firstPoint, secondPoint);
 
-      Offset test = Offset((secondPoint.dx - firstPoint.dx)/2, (secondPoint.dy - firstPoint.dy)/2);
+      Offset centerVector = Offset((secondPoint.dx - firstPoint.dx)/2, (secondPoint.dy - firstPoint.dy)/2);
       Offset center = Offset(
-          firstPoint.dx + test.dx,
-          firstPoint.dy + test.dy
-      );
-      Offset thirdPoint = Offset(
-        center.dx - test.dx,
-        center.dy + test.dy
-      );
-      Offset forthPoint = Offset(
-          center.dx + test.dx,
-          center.dy - test.dy
+          firstPoint.dx + centerVector.dx,
+          firstPoint.dy + centerVector.dy
       );
 
       double radius =
@@ -40,9 +32,16 @@ class RectangleInCircle extends DrawingObject {
       paint.color = mat.Colors.blue;
       canvas.drawCircle(center, radius, paint);
 
-      
+      Offset unitVector = Offset((firstPoint.dx - center.dx)/radius, (firstPoint.dy - center.dy)/radius);
 
-      //Offset thirdPoint = Offset(center.dx + radius);
+      Offset thirdPoint = Offset(
+          center.dx + (-unitVector.dy * radius),
+          center.dy + (unitVector.dx * radius)
+      );
+      Offset forthPoint = Offset(
+          center.dx + (unitVector.dy * radius),
+          center.dy + (-unitVector.dx * radius)
+      );
 
       paint.color = mat.Colors.indigo;
       canvas.drawLine(firstPoint, thirdPoint, paint);

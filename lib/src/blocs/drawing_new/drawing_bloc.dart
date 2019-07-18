@@ -31,9 +31,12 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   ReduxStateObject getInitialState() {
     //return ReduxStateObject(CustomPath(), List(), null, false);
     //return ReduxStateObject(Rectangle(), List(), null, false);
-    //return ReduxStateObject(Oval(), List(), null, false);
-    return ReduxStateObject(RectangleInCircle(), List(), null, false);
-
+    return ReduxStateObject(Oval(), List(), null, false);
+    //return ReduxStateObject(RectangleInCircle(), List(), null, false);
+    //return ReduxStateObject(StarEight(), List(), null, false);
+    //return ReduxStateObject(StarFive(), List(), null, false);
+    //return ReduxStateObject(StarSixteen(), List(), null, false);
+    //return ReduxStateObject(Flower(), List(), null, false);
   }
 
   bool shouldSave(int backUpLength) {
