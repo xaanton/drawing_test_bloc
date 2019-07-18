@@ -36,6 +36,10 @@ class DrawingSaveEvent extends DrawingEvent {
   DrawingSaveEvent(this.image, this.lastIndex);
 }
 
-class DrawingClearEvent extends DrawingEvent{
+class DrawingClearEvent extends DrawingEvent {
   DrawingClearEvent() : super([]);
+}
+
+class DrawingOverEvent extends DrawingEvent {
+
 }
