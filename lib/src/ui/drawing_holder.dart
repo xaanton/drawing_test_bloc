@@ -1,151 +1,259 @@
-import 'dart:async';
-
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'temp_holder.dart';
+
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import 'dart:async';
 import 'package:rxdart/rxdart.dart';
+import 'package:drawing_test3/src/blocs/drawing_new/drawing_bloc.dart';
+import 'package:bloc/bloc.dart';
 
-import 'package:drawing_test3/src/blocs/drawing/drawing_bloc.dart';
-import 'package:drawing_test3/src/blocs/drawing/drawing_events.dart';
-//import 'package:drawing_test3/src/blocs/drawing/drawing_states.dart';
-import 'package:drawing_test3/src/blocs/drawing/redux_state_object.dart';
-
-class DrawingHolder extends StatefulWidget {
-  DrawingHolder({Key key, this.title, this.width, this.height})
+class MyMasterPiece extends StatefulWidget {
+  MyMasterPiece({Key key, this.title, this.width, this.height})
       : super(key: key);
-
   final String title;
   final double width;
   final double height;
 
   @override
-  _DrawingHolderState createState() =>
-      _DrawingHolderState(width: width, height: height);
+  _MyMasterPieceState createState() =>
+      _MyMasterPieceState(width: width, height: height);
 }
 
-class _DrawingHolderState extends State<DrawingHolder> {
+class _MyMasterPieceState extends State<MyMasterPiece> {
   GlobalKey globalKey = GlobalKey();
 
+  MasterPieceHolder holder;
   final double width;
   final double height;
-  final double buttonHeight = 75.0;
-  final DrawingBloc bloc = DrawingBloc();
+  final double buttonHeight = 300.0;
 
-  _DrawingHolderState({this.width, this.height});
+  _MyMasterPieceState({this.width, this.height});
 
-  void _onPanStart(BuildContext context, DragStartDetails details, ui.Picture picture, ReduxStateObject state) {
-    RenderBox box = context.findRenderObject();
-    Offset tapPos = box.globalToLocal(details.globalPosition);
-
-    List cur = state.cur;
-    if(cur == null)cur = List<Offset>();
-
-    bloc.dispatch(DrawingUpdatedEvent(cur: cur..add(tapPos), image: state.image, picture: state.picture, state: state));
-  }
-
-  void _onPanUpdate(BuildContext context,
-      DragUpdateDetails details,
-      List<Offset> cur,
-      ui.Picture picture,
-      MyCustomPainter painter,
-      ReduxStateObject state) {
-    RenderBox box = context.findRenderObject();
-    Offset tapPos = box.globalToLocal(details.globalPosition);
-    ui.Picture picture = state.picture;
-    /*if(cur != null && cur.length > 20) {
-      picture = painter.savePicture();
-      cur = List();
-    }*/
-    List cur = state.cur;
-    if(cur == null)cur = List<Offset>();
-    if(cur.length > 120)_backupImage(painter, cur, state);
-    bloc.dispatch(DrawingUpdatedEvent(cur: cur..add(tapPos), picture: picture, image: state.image, state: state));
-  }
-
-  /*void _saveImage(List<Offset> cur, MyCustomPainter painter,) async {
-    ui.Image image = await painter.savePicture();
-    bloc.dispatch(DrawingSaveImageEvent(image: image, offset: cur.length -1));
-  }*/
-
-  void _onPanUp(MyCustomPainter painter, ReduxStateObject state) {
-    List cur = state.cur;
-    if(cur == null)cur = List<Offset>();
-    //cur..add(null);
-    _backupImage(painter, cur, state);
-    bloc.dispatch(DrawingUpdatedEvent(cur: cur, picture: null, image: state.image, state: state));
-  }
-
-  void _backupImage(MyCustomPainter painter, List<Offset> cur, ReduxStateObject state) async {
-    var image = await painter.saveImage();
-    //bloc.dispatch(DrawingUpdatedEvent(cur: List(), picture: state.picture, image: image, state: state));
-    int lastIndex = cur == null ? -1 : cur.length -1;
-    bloc.dispatch(DrawingSaveImageEvent(image: image, state: state, lastIndex: lastIndex));
-  }
-
-  void _clear() {
-    print("Clear!");
-    bloc.dispatch(DrawingClearEvent(
-      state: null
-    ));
-  }
-
-  Widget getGestureDetector(List<Offset> current,
-      ui.Picture picture,
-      ui.Image image,
-      ReduxStateObject state) {
-
-    MyCustomPainter painter = MyCustomPainter(current, picture, image);
-    return GestureDetector(
-        onPanStart: (DragStartDetails details) => _onPanStart(context, details, picture, state),
-        onPanUpdate: (DragUpdateDetails details) =>
-            _onPanUpdate(context, details, current, picture, painter, state),
-        onPanEnd: (DragEndDetails details) => _onPanUp(painter, state),
-        child: RepaintBoundary(
-          child: CustomPaint(
-            painter: painter,
-            willChange: true,
-          ),
-        ),);
+  @override
+  void initState() {
+    super.initState();
+    holder = new MasterPieceHolder(height: height - buttonHeight, width: width);
   }
 
   @override
   Widget build(BuildContext context) {
-
-    Provider.of<PublishSubject<String>>(context).listen((event) => _clear());
-    return BlocBuilder(
-      bloc: bloc,
-      builder: (context, state) {
-        return Center(
-            child: SizedBox.expand(
-              child: getGestureDetector(state.cur, state.picture, state.image, state),
-            ));
-      }
+    return
+       Column(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Expanded(flex: 10,child: holder),
+          //holder,
+          /*Expanded(
+              child: Divider()
+          ),*/
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              MaterialButton(
+                  minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(StarFive())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        StarFive()
+                          ..firstPoint = Offset(-10, -10)
+                          ..secondPoint = Offset(10, 10),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+              MaterialButton(
+                  minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(StarEight())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        StarEight()
+                          ..firstPoint = Offset(-10, -10)
+                          ..secondPoint = Offset(10, 10),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+              MaterialButton(
+                  minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(StarSixteen())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        StarSixteen()
+                          ..firstPoint = Offset(-10, -10)
+                          ..secondPoint = Offset(10, 10),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+              MaterialButton(
+                  minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(Oval())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        Oval()
+                          ..firstPoint = Offset(-10, -10)
+                          ..secondPoint = Offset(10, 10),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+              MaterialButton(
+                minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(Flower())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        Flower()
+                          ..firstPoint = Offset(-10, -10)
+                          ..secondPoint = Offset(10, 10),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+              MaterialButton(
+                minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(CustomPath())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        CustomPath()
+                          ..path.add(Offset(-10, -10))
+                          ..path.add(Offset(10, 10)),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+              MaterialButton(
+                minWidth: 40,
+                  color: Colors.blueAccent,
+                  onPressed: () => holder.bloc.dispatch(DrawingChangeObjectEvent(Rectangle())),
+                  child: CustomPaint(
+                    painter: MyDrawingPainter(
+                        Rectangle()
+                          ..firstPoint = Offset(-10, -10)
+                          ..secondPoint = Offset(10, 10),
+                        null, null, null, false),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: MaterialButton(
+                    minWidth: 300,
+                    color: Colors.lightBlue[200],
+                    onPressed: () => holder.bloc.dispatch(DrawingClearEvent()),
+                    child: Text("Clear")
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
     );
   }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
 }
 
 
-class MyCustomPainter extends ChangeNotifier implements CustomPainter {
-  //final List<ui.Image> backUp = new List();
-  final List<Offset> current;
-  final Color chosenColor = Colors.amberAccent;
+class MasterPieceHolder extends StatelessWidget {
   final ui.Image image;
-  final ui.Picture picture;
-  Size _size;
+  final double height;
+  final double width;
+  final DrawingBloc bloc = DrawingBloc();
 
-  MyCustomPainter(this.current, this.picture, this.image);
+  void _onPanStart(BuildContext context, DragStartDetails details) {
+    RenderBox box = context.findRenderObject();
+    print(details.globalPosition);
+    Offset tapPos = box.globalToLocal(details.globalPosition);
+    bloc.dispatch(DrawingUpdatedEvent(cur: tapPos));
+  }
+
+  void _onPanUpdate(BuildContext context, DragUpdateDetails details) {
+    RenderBox box = context.findRenderObject();
+    print(details.globalPosition);
+    Offset tapPos = box.globalToLocal(details.globalPosition);
+    //if(tapPos.dy > this.height)tapPos = Offset(tapPos.dx, this.height);
+    bloc.dispatch(DrawingUpdatedEvent(cur: tapPos));
+  }
+
+  void _onPanUp() {
+    bloc.dispatch(DrawingOverEvent());
+  }
+
+  void clear() {
+    print("Clear!");
+    bloc.dispatch(DrawingClearEvent());
+  }
+
+  MasterPieceHolder({this.height, this.width, this.image});
 
   @override
-  bool shouldRepaint(MyCustomPainter old) {
+  Widget build(BuildContext context) {
+    return BlocBuilder<ReduxStateObject>(
+        bloc: bloc,
+        builder: (context, state) {
+          if(state != null) {
+            return SizedBox.expand(
+                child: GestureDetector(
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: MyDrawingPainter(state.cur, state.backup, state.image, bloc, state.shouldSave),
+                      isComplex: true,
+                      willChange: false,
+                    ),
+                  ),
+                  onPanStart: (DragStartDetails details) =>
+                      _onPanStart(context, details),
+                  onPanUpdate: (DragUpdateDetails details) =>
+                      _onPanUpdate(context, details),
+                  onPanEnd: (DragEndDetails details) =>
+                      _onPanUp(),
+                ),
+              );
+
+          } else {
+            return Center(
+              child: RefreshProgressIndicator()
+            );
+          }
+
+        }
+    );
+  }
+}
+
+class MyDrawingPainter extends ChangeNotifier implements CustomPainter {
+
+  final List<DrawingObject> backUp;
+  final DrawingObject current;
+  Color chosenColor = Colors.indigoAccent;
+  final ui.Image image;
+  final DrawingBloc bloc;
+  final shouldSave;
+
+  MyDrawingPainter(this.current, this.backUp, this.image, this.bloc, this.shouldSave);
+
+  @override
+  bool shouldRepaint(MyDrawingPainter old) {
     return true;
   }
 
@@ -158,68 +266,69 @@ class MyCustomPainter extends ChangeNotifier implements CustomPainter {
 
   void paint(Canvas canvas, Size size) {
     print("paint");
+    _paintHelper(canvas, size);
+    if (shouldSave) {
+      _paintAndSave(canvas, size);
+    }
+  }
+
+  void _paintAndSave(Canvas canvas, Size size) async {
+    final recorder = new ui.PictureRecorder();
+    Canvas test = new Canvas(recorder, Rect.fromPoints(Offset(0.0, 0.0), Offset(size.width, size.height)));
+    _paintHelper(test, size);
+    final picture = recorder.endRecording();
+    if(bloc != null) {
+      savePicture(picture, size);
+    }
+  }
+
+  void _paintHelper(Canvas canvas, Size size) {
     Paint paint = Paint()
     //..color = chosenColor
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 6.0
       ..style = PaintingStyle.stroke;
-    /*
-    if (picture != null) {
-      //canvas.drawImage(image, Offset(0.0, 0.0), paint);
-      print(picture.approximateBytesUsed);
-      canvas.drawPicture(picture);
-    }*/
 
     if (image != null) {
+      print("image is not null");
       canvas.drawImage(image, Offset(0.0, 0.0), paint);
     }
 
-    if (size != null) {
-      _size = size;
+    if (backUp != null) {
+      backUp.forEach((el) {
+        //paint.color = chosenColor;
+        /*Path strokePath = new Path();
+        strokePath.addPolygon(el, false);
+        canvas.drawPath(strokePath, paint);*/
+        //el.color = chosenColor;
+        el.drawObject(canvas, paint);
+      });
     }
 
-    if (this.current != null && this.current.length > 1) {
-      paint.color = chosenColor;
-      Path strokePath = new Path();
+    if (current != null) {
+      //paint.color = chosenColor;
+      /*Path strokePath = new Path();
       strokePath.addPolygon(current, false);
-      canvas.drawPath(strokePath, paint);
-    } else if(this.current != null && this.current.length > 0) {
-      paint.color = chosenColor;
-      canvas.drawPoints(ui.PointMode.points, current, paint);
+      canvas.drawPath(strokePath, paint);*/
+      //current.color = chosenColor;
+      current.drawObject(canvas, paint);
     }
 
   }
 
-  ui.Picture savePicture() {
-    final recorder = new ui.PictureRecorder();
-    final canvas = Canvas(recorder,
-        Rect.fromPoints(Offset(0.0, 0.0), Offset(_size.width, _size.height)));
 
-    paint(canvas, null);
+  Future<void> savePicture(Picture picture, Size size) async {
+    bloc.dispatch(DrawingSaveInitEvent());
+    final lastIndex = backUp.length - 1;
 
-    final picture = recorder.endRecording();
-    //picture.
-    //final img = await picture.toImage(375, 812);
-    return picture;
+    final img = await picture.toImage(size.width.toInt(), size.height.toInt());
+    picture.dispose();
+    bloc.dispatch(DrawingSaveEvent(img, lastIndex));
+    print("done!");
     //final pngBytes = await img.toByteData(format: ImageByteFormat.png);
   }
 
-  Future<ui.Image> saveImage() async {
-    final recorder = new ui.PictureRecorder();
-    final canvas = Canvas(recorder,
-        Rect.fromPoints(Offset(0.0, 0.0), Offset(_size.width, _size.height)));
-
-    paint(canvas, null);
-
-    final picture = recorder.endRecording();
-    //picture.
-    final img = await picture.toImage(375, 812);
-    //return picture;
-    //final pngBytes = await img.toByteData(format: ImageByteFormat.png);
-    return img;
-  }
-
-  /*ui.Image getImage() {
+  ui.Image getImage() {
     return image;
-  }*/
+  }
 }

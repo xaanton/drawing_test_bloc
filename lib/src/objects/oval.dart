@@ -32,11 +32,11 @@ class Oval extends DrawingObject {
       /*Rect rect = Rect.fromPoints(firstPoint, secondPoint);
       paint.color = mat.Colors.indigo;
       canvas.drawRect(rect, paint);*/
-      paint.color = mat.Colors.red;
+      /*paint.color = mat.Colors.red;
       canvas.drawCircle(center, 3, paint);
       paint.color = mat.Colors.green;
       canvas.drawCircle(firstPoint, 3, paint);
-      canvas.drawCircle(secondPoint, 3, paint);
+      canvas.drawCircle(secondPoint, 3, paint);*/
       //canvas.drawRect(rect, paint);
     }
   }
