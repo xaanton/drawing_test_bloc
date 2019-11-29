@@ -23,7 +23,7 @@ class MyDrawing extends StatefulWidget {
 class _MyDrawingState extends State<MyDrawing> {
   GlobalKey globalKey = GlobalKey();
 
-  MasterPieceHolder holder;
+  MyDrawingHolder holder;
   final double width;
   final double height;
   final double buttonHeight = 300.0;
@@ -33,7 +33,7 @@ class _MyDrawingState extends State<MyDrawing> {
   @override
   void initState() {
     super.initState();
-    holder = new MasterPieceHolder(height: height - buttonHeight, width: width);
+    holder = new MyDrawingHolder(height: height - buttonHeight, width: width);
   }
 
   @override
@@ -170,7 +170,7 @@ class _MyDrawingState extends State<MyDrawing> {
 }
 
 
-class MasterPieceHolder extends StatelessWidget {
+class MyDrawingHolder extends StatelessWidget {
   final ui.Image image;
   final double height;
   final double width;
@@ -200,7 +200,7 @@ class MasterPieceHolder extends StatelessWidget {
     bloc.dispatch(DrawingClearEvent());
   }
 
-  MasterPieceHolder({this.height, this.width, this.image});
+  MyDrawingHolder({this.height, this.width, this.image});
 
   @override
   Widget build(BuildContext context) {
