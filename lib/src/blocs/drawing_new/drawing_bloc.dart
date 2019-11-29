@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:rxdart/rxdart.dart';
@@ -29,14 +27,7 @@ class DrawingBloc extends Bloc<DrawingEvent, StateObject> {
    }
 
   StateObject getInitialState() {
-    //return ReduxStateObject(CustomPath(), List(), null, false);
-    //return ReduxStateObject(Rectangle(), List(), null, false);
-    return StateObject(Oval(), List(), null, false);
-    //return ReduxStateObject(RectangleInCircle(), List(), null, false);
-    //return ReduxStateObject(StarEight(), List(), null, false);
-    //return ReduxStateObject(StarFive(), List(), null, false);
-    //return ReduxStateObject(StarSixteen(), List(), null, false);
-    //return ReduxStateObject(Flower(), List(), null, false);
+    return StateObject(CustomPath(), List(), null, false);
   }
 
   bool shouldSave(int backUpLength) {
