@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
-import 'redux_state_object.dart';
+import 'state_object.dart';
 
 abstract class DrawingEvent extends Equatable {
   DrawingEvent([List props = const []]) : super(props);
@@ -19,7 +19,7 @@ class DrawingUpdatedEvent extends DrawingEvent {
 
 class DrawingRedrawEvent extends DrawingEvent {
 
-  final ReduxStateObject state;
+  final StateObject state;
 
   DrawingRedrawEvent({@required this.state})
       : assert(state != null), super([state]);

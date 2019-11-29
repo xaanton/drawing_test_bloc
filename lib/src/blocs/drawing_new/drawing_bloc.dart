@@ -6,17 +6,17 @@ import 'package:bloc/bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'drawing_events.dart';
-import 'redux_state_object.dart';
+import 'state_object.dart';
 
 export 'temp.dart';
-export 'redux_state_object.dart';
+export 'state_object.dart';
 export 'drawing_events.dart';
 
 
 
-class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
+class DrawingBloc extends Bloc<DrawingEvent, StateObject> {
 
-  final BehaviorSubject<ReduxStateObject> stateStream = new BehaviorSubject();
+  final BehaviorSubject<StateObject> stateStream = new BehaviorSubject();
   final BehaviorSubject<bool> isSavingStream = new BehaviorSubject();
 
   DrawingBloc() {
@@ -28,10 +28,10 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     stateStream.add(initialState);
    }
 
-  ReduxStateObject getInitialState() {
+  StateObject getInitialState() {
     //return ReduxStateObject(CustomPath(), List(), null, false);
     //return ReduxStateObject(Rectangle(), List(), null, false);
-    return ReduxStateObject(Oval(), List(), null, false);
+    return StateObject(Oval(), List(), null, false);
     //return ReduxStateObject(RectangleInCircle(), List(), null, false);
     //return ReduxStateObject(StarEight(), List(), null, false);
     //return ReduxStateObject(StarFive(), List(), null, false);
@@ -44,7 +44,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   }
 
   @override
-  ReduxStateObject get initialState => this.getInitialState();
+  StateObject get initialState => this.getInitialState();
 
   @override
   Stream<DrawingEvent> transform(Stream<DrawingEvent> events) {
@@ -67,7 +67,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
   }
 
   @override
-  Stream<ReduxStateObject> mapEventToState(DrawingEvent event) async* {
+  Stream<StateObject> mapEventToState(DrawingEvent event) async* {
     print("event2 = " + event.runtimeType.toString());
 
     if (event is DrawingRedrawEvent) {
@@ -75,7 +75,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     }
 
     if(event is DrawingUpdatedEvent) {
-      ReduxStateObject curState = stateStream.value;
+      StateObject curState = stateStream.value;
       DrawingObject newCur = curState.cur;
       List<DrawingObject> newBackUp = curState.backup;
       if(event.cur != null) newCur.handleTap(event.cur);
@@ -85,7 +85,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
         if(event.cur != null) newCur.handleTap(event.cur);
       }
 
-      ReduxStateObject newState = ReduxStateObject(
+      StateObject newState = StateObject(
           newCur,
           newBackUp,
           curState.image,
@@ -100,13 +100,13 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
     if(event is DrawingSaveEvent) {
       isSavingStream.add(false);
-      ReduxStateObject curState = stateStream.value;
+      StateObject curState = stateStream.value;
       List<DrawingObject> newBackup = curState.backup;
       if(newBackup.length -1 >= event.lastIndex && event.lastIndex > -1) {
         newBackup = newBackup.sublist(event.lastIndex);
       }
 
-      ReduxStateObject newState = ReduxStateObject(
+      StateObject newState = StateObject(
           curState.cur,
           newBackup,
           event.image,
@@ -117,7 +117,7 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
 
     if(event is DrawingClearEvent) {
       try {
-        ReduxStateObject newState = this.getInitialState();
+        StateObject newState = this.getInitialState();
         stateStream.add(newState);
       } catch (e) {
         print(e.toString());
@@ -126,13 +126,13 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     }
 
     if(event is DrawingOverEvent) {
-      ReduxStateObject curState = stateStream.value;
+      StateObject curState = stateStream.value;
       DrawingObject newCur = curState.cur;
       List<DrawingObject> newBackUp = curState.backup;
       newBackUp.add(newCur);
       newCur = newCur.getEmptyInstance();
 
-      ReduxStateObject newState = ReduxStateObject(
+      StateObject newState = StateObject(
           newCur,
           newBackUp,
           curState.image,
@@ -142,10 +142,10 @@ class DrawingBloc extends Bloc<DrawingEvent, ReduxStateObject> {
     }
 
     if(event is DrawingChangeObjectEvent) {
-      ReduxStateObject curState = stateStream.value;
+      StateObject curState = stateStream.value;
       DrawingObject newCur = event.newObject;
       List<DrawingObject> newBackUp = curState.backup;
-      ReduxStateObject newState = ReduxStateObject(
+      StateObject newState = StateObject(
           newCur,
           newBackUp,
           curState.image,

@@ -8,19 +8,19 @@ import 'package:rxdart/rxdart.dart';
 import 'package:drawing_test3/src/blocs/drawing_new/drawing_bloc.dart';
 import 'package:bloc/bloc.dart';
 
-class MyMasterPiece extends StatefulWidget {
-  MyMasterPiece({Key key, this.title, this.width, this.height})
+class MyDrawing extends StatefulWidget {
+  MyDrawing({Key key, this.title, this.width, this.height})
       : super(key: key);
   final String title;
   final double width;
   final double height;
 
   @override
-  _MyMasterPieceState createState() =>
-      _MyMasterPieceState(width: width, height: height);
+  _MyDrawingState createState() =>
+      _MyDrawingState(width: width, height: height);
 }
 
-class _MyMasterPieceState extends State<MyMasterPiece> {
+class _MyDrawingState extends State<MyDrawing> {
   GlobalKey globalKey = GlobalKey();
 
   MasterPieceHolder holder;
@@ -28,7 +28,7 @@ class _MyMasterPieceState extends State<MyMasterPiece> {
   final double height;
   final double buttonHeight = 300.0;
 
-  _MyMasterPieceState({this.width, this.height});
+  _MyDrawingState({this.width, this.height});
 
   @override
   void initState() {
@@ -43,10 +43,6 @@ class _MyMasterPieceState extends State<MyMasterPiece> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(flex: 10,child: holder),
-          //holder,
-          /*Expanded(
-              child: Divider()
-          ),*/
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -208,7 +204,7 @@ class MasterPieceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ReduxStateObject>(
+    return BlocBuilder<StateObject>(
         bloc: bloc,
         builder: (context, state) {
           if(state != null) {
